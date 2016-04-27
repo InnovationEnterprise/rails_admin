@@ -18,8 +18,14 @@ module RailsAdmin
       end
 
       def create_history_item(message, object, abstract_model, user)
+        begin
+          changes = JSON.generate(message)
+        rescue JSON::GeneratorError
+          changes = message
+        end
+
         create(
-          message: JSON.generate(message),
+          message: changes,
           item: object.id,
           table: abstract_model.to_s,
           username: user.try(:email)
@@ -46,7 +52,12 @@ module RailsAdmin
     end
 
     def message
-      changes = JSON.parse(super)
+      begin
+        changes = JSON.parse(super)
+      rescue JSON::ParserError
+        changes = super
+      end
+
       return changes unless changes.is_a?(Hash)
       changes.reject { |_, (old, new)| (old.blank? && new.blank?) || (old.presence == new.presence) }
     end
