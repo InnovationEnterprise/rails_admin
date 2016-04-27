@@ -20,7 +20,7 @@
       - columns << { property_name: "created_at", css_class: "created_at",link_text: t('admin.table_headers.created_at') }
       - columns << { property_name: "username",   css_class: "username",  link_text: t('admin.table_headers.username')   }
       - columns << { property_name: "item",       css_class: "item",      link_text: t('admin.table_headers.item')       } if @general
-      - columns << { property_name: "message",    css_class: "message",   link_text: t('admin.table_headers.message')    }
+      - columns << { property_name: "message",    css_class: "message",   link_text: 'Changes'    }
 
       - columns.each do |column|
         - property_name = column[:property_name]
@@ -29,11 +29,14 @@
         - sort_location = send(path_method, params.except("sort_reverse").merge(model_name: @abstract_model.to_param, sort: property_name).merge(selected && sort_reverse != "true" ? {sort_reverse: "true"} : {}))
         %th{class: "header pjax #{column[:css_class]} #{sort_direction if selected}", :'data-href' => sort_location}= column[:link_text]
   %tbody
-    - @history.each_with_index do |object, index|
+    - @history.each do |object|
       %tr
         - unless object.created_at.nil?
           %td= l(object.created_at, format: :long, default: l(object.created_at, format: :long, locale: :en))
-        %td= object.username
+        %td
+          - username, domain = object.username.split('@')
+          = username
+          = "@#{domain}"
         - if @general
           - if o = @abstract_model.get(object.item)
             - label = o.send(@abstract_model.config.object_label_method)
@@ -43,7 +46,27 @@
               %td= label
           - else
             %td= "#{@abstract_model.config.label} ##{object.item}"
-        %td= object.message.in?(['delete', 'new']) ? t("admin.actions.#{object.message}.done").capitalize : object.message
+        %td
+          - changes = object.message
+          - if changes.blank?
+            Did not find any changes.
+          - elsif changes.is_a?(Hash)
+            %table.table.table-bordered
+              %thead
+                %tr
+                  %th #
+                  %th Attribute
+                  %th Old Value
+                  %th New Value
+              %tbody
+                - changes.each_with_index do |(attribute, (old_value, new_value)), index|
+                  %tr
+                    %td= index + 1
+                    %td= attribute
+                    %td= old_value || 'nil'
+                    %td= new_value || 'nil'
+          - else
+            = %w(delete new).include?(changes) ? t("admin.actions.#{changes}.done").capitalize : changes
 
 - unless params[:all] || !@history.respond_to?(:current_page)
   = paginate(@history, theme: 'twitter-bootstrap', remote: true)
