@@ -63,8 +63,8 @@
                   %tr
                     %td= index + 1
                     %td= attribute
-                    %td= old_value || 'nil'
-                    %td= new_value || 'nil'
+                    %td= old_value.nil? ? 'nil' : old_value
+                    %td= new_value.nil? ? 'nil' : new_value
           - else
             = %w(delete new).include?(changes) ? t("admin.actions.#{changes}.done").capitalize : changes
 
