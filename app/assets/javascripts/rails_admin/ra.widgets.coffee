@@ -21,7 +21,7 @@ $(document).on 'rails_admin.dom_ready', (e, content) ->
           $(that).css('backgroundColor', '#' + hex)
 
     # datetime picker
-    $.fn.datetimepicker.defaults.icons =
+    $.fn.datetimepicker.icons =
       time:     'fa fa-clock-o'
       date:     'fa fa-calendar'
       up:       'fa fa-chevron-up'

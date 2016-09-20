@@ -27,7 +27,7 @@
         clearAll: "Clear all",
         remove: "Remove"
       },
-      searchDelay: 400,
+      searchDelay: 1000,
       remote_source: null,
       xhr: false
     },
